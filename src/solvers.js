@@ -40,7 +40,7 @@ window.findNQueensSolution = function(n) {
   return solution;
 };
 
-
+/*
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
   var solutionCount = 0;
@@ -91,9 +91,71 @@ window.countNQueensSolutions = function(n) {
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
 };
+*/
 
 
 
+// return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
+window.countNQueensSolutions = function(n) {
+  var solutionCount = 0;
+  var allCols=[];
+
+  for (var i=0; i<n; i++) {
+    allCols.push(i);
+  }
+
+  var openMajorandMinor = function (majors, minors, r, c) {
+    var maj=c-r;
+    var min=c+r;
+    return _.indexOf(majors, maj) === -1 && _.indexOf(minors, min)=== -1;
+  }
+
+  var findQueens = function(playsLeft, remainingCols, board, filledMaj, filledMin) {
+    // create board
+    if (playsLeft===n) {
+      board=new Board({n:n});
+    } else {
+      board=new Board(board.rows());
+    }
+
+    if (playsLeft>0) {
+      //loop over and place piece
+      for (var col=0; col<remainingCols.length; col++) {
+        var column=remainingCols[col];
+
+        //check to see if diagonals are open before placing
+        if (openMajorandMinor (filledMaj, filledMin, n-playsLeft, column)) {
+          var row=board.get(n-playsLeft);
+
+          row[column]=1;
+          board.set(n-playsLeft, row);
+
+          //copy columns and remove used column
+          var newCols=remainingCols.slice();
+          newCols.splice(col, 1);
+
+          //update newly filled diagonals
+          var newMaj=filledMaj.slice();
+          newMaj.push(column-(n-playsLeft));
+          
+          var newMin=filledMin.slice();
+          newMin.push(column+(n-playsLeft));
+
+          findQueens(playsLeft-1, newCols, board, newMaj, newMin);
+        }
+
+      }
+
+    } else if (playsLeft===0) {
+      solutionCount++;
+    }
+  }
+
+  findQueens(n, allCols, undefined, [], []);
+
+  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+  return solutionCount;
+};
 
 
 
