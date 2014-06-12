@@ -43,8 +43,58 @@ window.findNQueensSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solutionCount = undefined; //fixme
+  var solutionCount = 0;
+  var allCols=[];
+
+  for (var i=0; i<n; i++) {
+    allCols.push(i);
+  }
+
+  var noMajorOrMinorConflict = function(board, r, c) {
+    return board.hasMinorDiagonalConflictAt(c+r)===false && board.hasMajorDiagonalConflictAt(c-r)===false;
+  }
+
+  var findQueens = function(playsLeft, remainingCols, board) {
+    // create board
+    if (playsLeft===n) {
+      board=new Board({n:n});
+    } else {
+      board=new Board(board.rows());
+    }
+
+    if (playsLeft>0) {
+      var masterRow=board.get(n-playsLeft)
+      //loop over and place piece
+      for (var col=0; col<remainingCols.length; col++) {
+        var column=remainingCols[col];
+        row=masterRow.slice();
+        row[column]=1;
+        board.set(n-playsLeft, row);
+
+        //copy columns and remove used column
+        var newCols=remainingCols.slice();
+        newCols.splice(col, 1);
+
+        //check for conflicts and recurse
+        if (noMajorOrMinorConflict(board, n-playsLeft, column)) {
+          findQueens(playsLeft-1, newCols, board);
+        }
+      }
+
+    } else if (playsLeft===0) {
+      solutionCount++;
+    }
+  }
+
+  findQueens(n, allCols);
 
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
 };
+
+
+
+
+
+
+
